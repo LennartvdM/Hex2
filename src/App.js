@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import FramerHexZoomAnimation from './components/FramerHexZoomAnimation';
+import OptimizedHexZoomAnimation from './components/OptimizedHexZoomAnimation';
 
 function App() {
   const [outerScale, setOuterScale] = useState(1.5);
@@ -66,7 +66,7 @@ function App() {
         </div>
       </div>
       <div className="animation-container">
-        <FramerHexZoomAnimation
+        <OptimizedHexZoomAnimation
           outerScale={outerScale}
           innerScale={innerScale}
           speed={speed}
