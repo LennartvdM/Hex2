@@ -66,7 +66,7 @@ export function FramerHexZoomAnimation({
         return points
     }
 
-    function drawHexClippedImage(ctx, cell, timeNow) {
+    const drawHexClippedImage = useCallback((ctx, cell, timeNow) => {
         const { hexSize } = gridRef.current
         const cx = cell.x + hexSize
         const cy = cell.y + hexSize
@@ -130,7 +130,7 @@ export function FramerHexZoomAnimation({
         }
 
         ctx.restore()
-    }
+    }, [innerScale])
 
     function drawScaledImage(ctx, img, cx, cy, scale, hexSize) {
         const w = hexSize * 2
@@ -272,7 +272,7 @@ export function FramerHexZoomAnimation({
         }
 
         requestIdRef.current = requestAnimationFrame(animate)
-    }, [speed])
+    }, [speed, drawHexClippedImage])
 
     // Initialize & animate whenever the props change
     useEffect(() => {
