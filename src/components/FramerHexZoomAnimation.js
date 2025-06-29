@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useCallback } from "react"
 
 /**
  * A custom React component that replicates the Hexagonal Zoom Animation logic.
@@ -140,7 +140,7 @@ export function FramerHexZoomAnimation({
         ctx.drawImage(img, cx - sw / 2, cy - sh / 2, sw, sh)
     }
 
-    function initData(canvas) {
+    const initData = useCallback((canvas) => {
         if (!canvas) return
         const ctx = canvas.getContext("2d")
         if (!ctx) return
@@ -161,7 +161,6 @@ export function FramerHexZoomAnimation({
         const hexHeight = Math.sqrt(3) * hexSize
         const dx = 1.5 * hexSize
         const dy = hexHeight
-        const scrollSpeed = dy * speed
 
         const bleedRows = Math.ceil(height / dy)
         const numRows = visibleRows + 2 * bleedRows
@@ -206,8 +205,10 @@ export function FramerHexZoomAnimation({
                     baseInterval: interval,
                 })
 
+                // Fix the loop function issue by capturing the current globalIndex
+                const currentGlobalIndex = globalIndex
                 images.forEach((slot, i) => {
-                    const url = `https://picsum.photos/seed/${globalIndex}-${i}/300/300`
+                    const url = `https://picsum.photos/seed/${currentGlobalIndex}-${i}/300/300`
                     loadImage(url).then((loaded) => {
                         slot.img = loaded
                     })
@@ -216,9 +217,9 @@ export function FramerHexZoomAnimation({
             }
         }
         hexDataRef.current = data
-    }
+    }, [outerScale, interval])
 
-    function animate(timestamp) {
+    const animate = useCallback((timestamp) => {
         const canvas = canvasRef.current
         if (!canvas) return
 
@@ -233,7 +234,7 @@ export function FramerHexZoomAnimation({
         const { width, height } = screenSizeRef.current
         ctx.clearRect(0, 0, width, height)
 
-        const { dx, dy, totalHeight, startY } = gridRef.current
+        const { dy, totalHeight, startY } = gridRef.current
         const data = hexDataRef.current
 
         const offsetY = (dy * speed * elapsed) % totalHeight
@@ -271,7 +272,7 @@ export function FramerHexZoomAnimation({
         }
 
         requestIdRef.current = requestAnimationFrame(animate)
-    }
+    }, [speed])
 
     // Initialize & animate whenever the props change
     useEffect(() => {
@@ -302,7 +303,7 @@ export function FramerHexZoomAnimation({
                 cancelAnimationFrame(requestIdRef.current)
             }
         }
-    }, [outerScale, innerScale, speed, interval])
+    }, [initData, animate])
 
     // Canvas is sized to fill the container
     return (
